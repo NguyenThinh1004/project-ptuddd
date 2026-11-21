@@ -60,6 +60,6 @@ se duoc xoa theo (ON DELETE CASCADE).
 ## 4. Database
 
 - Database: studymate.db
-- Version: 1
+- Version: 2
 - Framework: Flutter
 - Storage: SQLite (sqflite)
