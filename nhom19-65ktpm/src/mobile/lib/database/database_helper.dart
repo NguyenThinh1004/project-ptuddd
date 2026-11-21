@@ -3,16 +3,21 @@ import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
 class DatabaseHelper {
+  // Singleton: Chi su dung mot DatabaseHelper
   DatabaseHelper._();
 
   static final DatabaseHelper instance = DatabaseHelper._();
 
-  static const int _databaseVersion = 1;
+  // Database Version 2
+  static const int _databaseVersion = 2;
   static const String _databaseName = 'studymate.db';
 
   Database? _database;
 
-  // Mo database, neu chua co thi tu dong tao
+  // ==========================================
+  // 1. MO VA KHOI TAO DATABASE
+  // ==========================================
+
   Future<Database> get database async {
     if (_database != null && _database!.isOpen) {
       return _database!;
@@ -25,6 +30,7 @@ class DatabaseHelper {
       path,
       version: _databaseVersion,
       onConfigure: (db) async {
+        // Bat rang buoc khoa ngoai
         await db.execute('PRAGMA foreign_keys = ON');
       },
       onCreate: _onCreate,
@@ -34,8 +40,13 @@ class DatabaseHelper {
     return _database!;
   }
 
+  // ==========================================
+  // 2. TAO CAC BANG KHI CHAY LAN DAU
+  // ==========================================
+
   Future<void> _onCreate(Database db, int version) async {
-    // 1. Bang mon hoc
+    // BANG 1: SUBJECTS
+    // Quan ly danh sach mon hoc
     await db.execute('''
       CREATE TABLE subjects (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -45,7 +56,8 @@ class DatabaseHelper {
       )
     ''');
 
-    // 2. Bang flashcards
+    // BANG 2: FLASHCARDS
+    // Quan ly the ghi nho va lich on tap SM-2
     await db.execute('''
       CREATE TABLE flashcards (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -63,7 +75,8 @@ class DatabaseHelper {
       )
     ''');
 
-    // 3. Bang lich su Pomodoro
+    // BANG 3: POMODORO SESSIONS
+    // Luu lich su phien hoc tap
     await db.execute('''
       CREATE TABLE pomodoro_sessions (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -73,7 +86,8 @@ class DatabaseHelper {
       )
     ''');
 
-    // 4. Bang thoi quen hoc tap
+    // BANG 4: DAILY HABITS
+    // Theo doi thoi quen hoc tap hang ngay
     await db.execute('''
       CREATE TABLE daily_habits (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -84,41 +98,65 @@ class DatabaseHelper {
       )
     ''');
 
+    // INDEX 1: Tim flashcards theo ngay on tap
     await db.execute('''
-      CREATE INDEX idx_flashcards_review
+      CREATE INDEX IF NOT EXISTS idx_flashcards_review
       ON flashcards(next_review_date)
     ''');
 
-    // Them du lieu mau lan dau
+    // INDEX 2: Tim flashcards theo mon hoc
+    // Bo sung trong Database Version 2
+    await db.execute('''
+      CREATE INDEX IF NOT EXISTS idx_flashcards_subject
+      ON flashcards(subject_id)
+    ''');
+
+    // Tu dong them du lieu mau lan dau
     await _seedData(db);
   }
 
-  // Xu ly migration khi nang phien ban database
+  // ==========================================
+  // 3. NANG CAP DATABASE (MIGRATION)
+  // ==========================================
+
   Future<void> _onUpgrade(
     Database db,
     int oldVersion,
     int newVersion,
   ) async {
-    // Database hien tai la version 1.
-    // Khi thay doi schema, tang _databaseVersion
-    // va bo sung migration tai day.
+    // Nang cap Version 1 -> Version 2
+    if (oldVersion < 2 && newVersion >= 2) {
+      // Tao index moi, khong xoa bang va du lieu
+      await db.execute('''
+        CREATE INDEX IF NOT EXISTS idx_flashcards_subject
+        ON flashcards(subject_id)
+      ''');
+    }
+
+    // Migration cho Version 3 tro len
+    // se duoc bo sung tai day trong tuong lai.
   }
 
+  // ==========================================
+  // 4. THEM DU LIEU MAU (SEED DATA)
+  // ==========================================
+
   Future<void> _seedData(Database db) async {
-    // Tao 2 mon hoc mau
+    // Tao mon hoc tieng Anh
     final englishId = await db.insert('subjects', {
       'name': 'English',
       'color': '#7C4DFF',
       'icon': 'language',
     });
 
+    // Tao mon hoc Toan
     await db.insert('subjects', {
       'name': 'Mathematics',
       'color': '#2196F3',
       'icon': 'calculate',
     });
 
-    // 10 flashcards tieng Anh mau
+    // 10 flashcards tieng Anh
     final words = <List<String>>[
       ['Apple', 'Qua tao'],
       ['Book', 'Quyen sach'],
@@ -132,7 +170,10 @@ class DatabaseHelper {
       ['Practice', 'Luyen tap'],
     ];
 
-    final today = DateTime.now().toIso8601String().substring(0, 10);
+    // Ngay on tap dau tien la ngay hien tai
+    final today = DateTime.now()
+        .toIso8601String()
+        .substring(0, 10);
 
     for (final word in words) {
       await db.insert('flashcards', {
@@ -144,19 +185,36 @@ class DatabaseHelper {
     }
   }
 
-  // Lay danh sach mon hoc
+  // ==========================================
+  // 5. TRUY VAN DANH SACH MON HOC
+  // ==========================================
+
   Future<List<Map<String, Object?>>> getSubjects() async {
     final db = await database;
-    return db.query('subjects', orderBy: 'id ASC');
+
+    return db.query(
+      'subjects',
+      orderBy: 'id ASC',
+    );
   }
 
-  // Lay danh sach flashcards
+  // ==========================================
+  // 6. TRUY VAN DANH SACH FLASHCARDS
+  // ==========================================
+
   Future<List<Map<String, Object?>>> getFlashcards() async {
     final db = await database;
-    return db.query('flashcards', orderBy: 'id ASC');
+
+    return db.query(
+      'flashcards',
+      orderBy: 'id ASC',
+    );
   }
 
-  // Dong ket noi database
+  // ==========================================
+  // 7. DONG DATABASE
+  // ==========================================
+
   Future<void> close() async {
     await _database?.close();
     _database = null;
