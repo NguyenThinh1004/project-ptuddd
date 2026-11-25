@@ -2,20 +2,24 @@
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
+import '../services/sm2_service.dart';
+
 class DatabaseHelper {
-  // Singleton: Chi su dung mot DatabaseHelper
+  // ==========================================
+  // 1. SINGLETON & DATABASE CONFIGURATION
+  // ==========================================
+
   DatabaseHelper._();
 
   static final DatabaseHelper instance = DatabaseHelper._();
 
-  // Database Version 2
   static const int _databaseVersion = 2;
   static const String _databaseName = 'studymate.db';
 
   Database? _database;
 
   // ==========================================
-  // 1. MO VA KHOI TAO DATABASE
+  // 2. MO VA KHOI TAO DATABASE
   // ==========================================
 
   Future<Database> get database async {
@@ -41,12 +45,13 @@ class DatabaseHelper {
   }
 
   // ==========================================
-  // 2. TAO CAC BANG KHI CHAY LAN DAU
+  // 3. TAO CAC BANG SQLITE
   // ==========================================
 
   Future<void> _onCreate(Database db, int version) async {
     // BANG 1: SUBJECTS
     // Quan ly danh sach mon hoc
+
     await db.execute('''
       CREATE TABLE subjects (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -58,6 +63,7 @@ class DatabaseHelper {
 
     // BANG 2: FLASHCARDS
     // Quan ly the ghi nho va lich on tap SM-2
+
     await db.execute('''
       CREATE TABLE flashcards (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -76,7 +82,8 @@ class DatabaseHelper {
     ''');
 
     // BANG 3: POMODORO SESSIONS
-    // Luu lich su phien hoc tap
+    // Luu lich su cac phien hoc tap
+
     await db.execute('''
       CREATE TABLE pomodoro_sessions (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -88,6 +95,7 @@ class DatabaseHelper {
 
     // BANG 4: DAILY HABITS
     // Theo doi thoi quen hoc tap hang ngay
+
     await db.execute('''
       CREATE TABLE daily_habits (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -98,25 +106,26 @@ class DatabaseHelper {
       )
     ''');
 
-    // INDEX 1: Tim flashcards theo ngay on tap
+    // INDEX: Tim flashcards theo ngay on tap
+
     await db.execute('''
       CREATE INDEX IF NOT EXISTS idx_flashcards_review
       ON flashcards(next_review_date)
     ''');
 
-    // INDEX 2: Tim flashcards theo mon hoc
-    // Bo sung trong Database Version 2
+    // INDEX: Tim flashcards theo mon hoc
+
     await db.execute('''
       CREATE INDEX IF NOT EXISTS idx_flashcards_subject
       ON flashcards(subject_id)
     ''');
 
-    // Tu dong them du lieu mau lan dau
+    // Them du lieu mau khi tao database lan dau
     await _seedData(db);
   }
 
   // ==========================================
-  // 3. NANG CAP DATABASE (MIGRATION)
+  // 4. DATABASE MIGRATION
   // ==========================================
 
   Future<void> _onUpgrade(
@@ -124,32 +133,34 @@ class DatabaseHelper {
     int oldVersion,
     int newVersion,
   ) async {
-    // Nang cap Version 1 -> Version 2
+    // Migration Version 1 -> Version 2
+
     if (oldVersion < 2 && newVersion >= 2) {
-      // Tao index moi, khong xoa bang va du lieu
       await db.execute('''
         CREATE INDEX IF NOT EXISTS idx_flashcards_subject
         ON flashcards(subject_id)
       ''');
     }
 
-    // Migration cho Version 3 tro len
-    // se duoc bo sung tai day trong tuong lai.
+    // Cac migration Version 3 tro len
+    // se duoc bo sung tai day.
   }
 
   // ==========================================
-  // 4. THEM DU LIEU MAU (SEED DATA)
+  // 5. THEM DU LIEU MAU (SEED DATA)
   // ==========================================
 
   Future<void> _seedData(Database db) async {
-    // Tao mon hoc tieng Anh
+    // Tao mon hoc English
+
     final englishId = await db.insert('subjects', {
       'name': 'English',
       'color': '#7C4DFF',
       'icon': 'language',
     });
 
-    // Tao mon hoc Toan
+    // Tao mon hoc Mathematics
+
     await db.insert('subjects', {
       'name': 'Mathematics',
       'color': '#2196F3',
@@ -157,6 +168,7 @@ class DatabaseHelper {
     });
 
     // 10 flashcards tieng Anh
+
     final words = <List<String>>[
       ['Apple', 'Qua tao'],
       ['Book', 'Quyen sach'],
@@ -170,7 +182,8 @@ class DatabaseHelper {
       ['Practice', 'Luyen tap'],
     ];
 
-    // Ngay on tap dau tien la ngay hien tai
+    // Ngay on tap dau tien
+
     final today = DateTime.now()
         .toIso8601String()
         .substring(0, 10);
@@ -186,7 +199,7 @@ class DatabaseHelper {
   }
 
   // ==========================================
-  // 5. TRUY VAN DANH SACH MON HOC
+  // 6. LAY DANH SACH MON HOC
   // ==========================================
 
   Future<List<Map<String, Object?>>> getSubjects() async {
@@ -199,7 +212,7 @@ class DatabaseHelper {
   }
 
   // ==========================================
-  // 6. TRUY VAN DANH SACH FLASHCARDS
+  // 7. LAY DANH SACH FLASHCARDS
   // ==========================================
 
   Future<List<Map<String, Object?>>> getFlashcards() async {
@@ -212,7 +225,110 @@ class DatabaseHelper {
   }
 
   // ==========================================
-  // 7. DONG DATABASE
+  // 8. LAY FLASHCARDS DEN HAN ON TAP
+  // ==========================================
+
+  Future<List<Map<String, Object?>>> getDueFlashcards({
+    DateTime? date,
+  }) async {
+    final db = await database;
+
+    // Mac dinh lay ngay hien tai
+    final today = (date ?? DateTime.now())
+        .toIso8601String()
+        .substring(0, 10);
+
+    // Lay cac the co ngay on <= hom nay
+    return db.query(
+      'flashcards',
+      where: 'next_review_date <= ?',
+      whereArgs: [today],
+      orderBy: 'next_review_date ASC, id ASC',
+    );
+  }
+
+  // ==========================================
+  // 9. DANH GIA FLASHCARD BANG THUAT TOAN SM-2
+  // ==========================================
+
+  Future<Sm2Result> reviewFlashcard({
+    required int flashcardId,
+    required int quality,
+    DateTime? reviewDate,
+  }) async {
+    final db = await database;
+
+    // Su dung transaction de dam bao
+    // viec doc va cap nhat du lieu nhat quan
+
+    return db.transaction((txn) async {
+      // 1. Lay flashcard theo ID
+
+      final cards = await txn.query(
+        'flashcards',
+        where: 'id = ?',
+        whereArgs: [flashcardId],
+        limit: 1,
+      );
+
+      // Kiem tra flashcard co ton tai khong
+
+      if (cards.isEmpty) {
+        throw StateError(
+          'Khong tim thay flashcard ID: $flashcardId',
+        );
+      }
+
+      final card = cards.first;
+
+      // 2. Lay trang thai SM-2 hien tai
+
+      final repetitions = card['repetitions'] as int;
+
+      final easeFactor =
+          (card['ease_factor'] as num).toDouble();
+
+      final interval = card['interval'] as int;
+
+      // 3. Tinh toan lich on tap bang SM-2
+
+      final result = Sm2Service.calculate(
+        quality: quality,
+        repetitions: repetitions,
+        easeFactor: easeFactor,
+        interval: interval,
+        reviewDate: reviewDate,
+      );
+
+      // 4. Chuyen ngay on tiep theo sang TEXT
+      // Dinh dang YYYY-MM-DD
+
+      final nextReviewDate = result.nextReviewDate
+          .toIso8601String()
+          .substring(0, 10);
+
+      // 5. Cap nhat trang thai flashcard vao SQLite
+
+      await txn.update(
+        'flashcards',
+        {
+          'repetitions': result.repetitions,
+          'ease_factor': result.easeFactor,
+          'interval': result.nextInterval,
+          'next_review_date': nextReviewDate,
+        },
+        where: 'id = ?',
+        whereArgs: [flashcardId],
+      );
+
+      // 6. Tra ve ket qua tinh toan SM-2
+
+      return result;
+    });
+  }
+
+  // ==========================================
+  // 10. DONG DATABASE
   // ==========================================
 
   Future<void> close() async {
