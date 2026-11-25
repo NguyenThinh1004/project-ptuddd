@@ -1,6 +1,8 @@
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'database/database_helper.dart';
 import 'providers/auth_provider.dart';
 import 'providers/theme_provider.dart';
 import 'theme/app_theme.dart';
@@ -10,21 +12,28 @@ import 'views/auth/onboarding_screen.dart';
 import 'views/auth/register_screen.dart';
 import 'views/auth/splash_screen.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Khoi tao SQLite khi ung dung bat dau
+  await DatabaseHelper.instance.database;
+
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => ThemeProvider()),
-        ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(
+          create: (_) => ThemeProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => AuthProvider(),
+        ),
       ],
       child: const StudyMateApp(),
     ),
   );
 }
 
-/// Ứng dụng chính StudyMate AI
-/// Quản lý giao diện Material 3 thích ứng Light / Dark Theme linh hoạt
+/// Ung dung chinh StudyMate AI
 class StudyMateApp extends StatelessWidget {
   const StudyMateApp({super.key});
 
