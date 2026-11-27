@@ -4,6 +4,7 @@ import 'package:mobile/providers/auth_provider.dart';
 import 'package:mobile/providers/discipline_provider.dart';
 import 'package:mobile/providers/pomodoro_provider.dart';
 import 'package:mobile/providers/theme_provider.dart';
+import 'package:mobile/services/pomodoro_alarm_player.dart';
 import 'package:mobile/services/pomodoro_database_helper.dart';
 import 'package:mobile/theme/app_theme.dart';
 import 'package:mobile/views/pomodoro/pomodoro_screen.dart';
@@ -24,6 +25,18 @@ class _FakeWakelockPlatform extends WakelockPlusPlatformInterface {
 
   @override
   Future<bool> get enabled async => toggles.isNotEmpty && toggles.last;
+}
+
+class _FakePomodoroAlarmPlayer implements PomodoroAlarmPlayer {
+  int playCount = 0;
+
+  @override
+  Future<void> play() async {
+    playCount++;
+  }
+
+  @override
+  Future<void> dispose() async {}
 }
 
 void main() {
@@ -107,7 +120,11 @@ void main() {
         () async {
       final discipline = DisciplineProvider();
       final initialStreak = discipline.currentStreak;
-      final pomodoro = PomodoroProvider(disciplineProvider: discipline);
+      final alarmPlayer = _FakePomodoroAlarmPlayer();
+      final pomodoro = PomodoroProvider(
+        disciplineProvider: discipline,
+        alarmPlayer: alarmPlayer,
+      );
 
       // Đặt 1 giây cuối để test hoàn thành
       pomodoro.setRemainingSecondsForTesting(1);
@@ -122,6 +139,22 @@ void main() {
 
       // Kiểm tra DisciplineProvider được cập nhật
       expect(discipline.todayMinutesLearned, greaterThan(25));
+      expect(alarmPlayer.playCount, 1);
+      pomodoro.dispose();
+    });
+
+    test('Disabling sound prevents alarm playback when timer expires',
+        () async {
+      final alarmPlayer = _FakePomodoroAlarmPlayer();
+      final pomodoro = PomodoroProvider(alarmPlayer: alarmPlayer);
+      pomodoro.updateSettings(soundEnabled: false);
+      pomodoro.setRemainingSecondsForTesting(1);
+      pomodoro.startTimer();
+
+      await Future.delayed(const Duration(milliseconds: 1200));
+
+      expect(alarmPlayer.playCount, 0);
+      pomodoro.dispose();
     });
   });
 

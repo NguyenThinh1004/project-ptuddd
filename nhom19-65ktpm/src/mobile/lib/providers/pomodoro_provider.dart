@@ -1,14 +1,15 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import '../services/pomodoro_alarm_player.dart';
 import '../services/pomodoro_database_helper.dart';
 import 'discipline_provider.dart';
 
 /// Các chế độ đếm giờ của Pomodoro
 enum PomodoroMode {
-  focus,      // Tập trung (mặc định 25 phút)
+  focus, // Tập trung (mặc định 25 phút)
   shortBreak, // Nghỉ ngắn (mặc định 5 phút)
-  longBreak,  // Nghỉ dài (mặc định 15 phút)
+  longBreak, // Nghỉ dài (mặc định 15 phút)
 }
 
 /// Provider quản lý toàn bộ trạng thái đồng hồ tập trung Focus Pomodoro
@@ -27,6 +28,7 @@ class PomodoroProvider extends ChangeNotifier {
   bool _isRunning = false;
   bool _isPaused = false;
   Timer? _timer;
+  final PomodoroAlarmPlayer _alarmPlayer;
 
   // Số phiên tập trung đã hoàn thành
   int _completedSessionsCount = 2; // Giả lập đã có 2 phiên trước đó
@@ -51,8 +53,11 @@ class PomodoroProvider extends ChangeNotifier {
   ];
   int _quoteIndex = 0;
 
-  PomodoroProvider({DisciplineProvider? disciplineProvider}) {
-    _disciplineProvider = disciplineProvider;
+  PomodoroProvider({
+    DisciplineProvider? disciplineProvider,
+    PomodoroAlarmPlayer? alarmPlayer,
+  })  : _disciplineProvider = disciplineProvider,
+        _alarmPlayer = alarmPlayer ?? AssetPomodoroAlarmPlayer() {
     _resetTimeToCurrentMode();
     PomodoroDatabaseHelper.instance.initDatabase();
   }
@@ -71,7 +76,8 @@ class PomodoroProvider extends ChangeNotifier {
   int get totalFocusMinutesToday => _totalFocusMinutesToday;
   bool get isDistractionLockEnabled => _isDistractionLockEnabled;
   bool get isSoundEnabled => _isSoundEnabled;
-  String get currentQuote => _inspirationalQuotes[_quoteIndex % _inspirationalQuotes.length];
+  String get currentQuote =>
+      _inspirationalQuotes[_quoteIndex % _inspirationalQuotes.length];
 
   /// Tiến độ từ 0.0 (vừa bắt đầu) đến 1.0 (kết thúc đếm ngược)
   double get progressRate {
@@ -131,6 +137,10 @@ class PomodoroProvider extends ChangeNotifier {
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (_remainingSeconds > 0) {
         _remainingSeconds--;
+        if (_remainingSeconds == 0) {
+          unawaited(_handleTimerCompleted());
+          return;
+        }
         // Đổi câu trích dẫn mỗi khi còn chẵn 5 phút để tạo động lực mới
         if (_remainingSeconds % 300 == 0) {
           _quoteIndex++;
@@ -215,11 +225,11 @@ class PomodoroProvider extends ChangeNotifier {
 
     // 1. Phát âm thanh chuông báo và rung phản hồi
     if (_isSoundEnabled) {
+      await _alarmPlayer.play();
       try {
-        await SystemSound.play(SystemSoundType.alert);
         await HapticFeedback.heavyImpact();
       } catch (e) {
-        debugPrint('Sound/Haptic error: $e');
+        debugPrint('Pomodoro haptic feedback failed: $e');
       }
     }
 
@@ -322,6 +332,7 @@ class PomodoroProvider extends ChangeNotifier {
   @override
   void dispose() {
     _timer?.cancel();
+    unawaited(_alarmPlayer.dispose());
     super.dispose();
   }
 }
