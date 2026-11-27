@@ -11,6 +11,20 @@ import 'package:mobile/views/pomodoro/widgets/circular_timer_widget.dart';
 import 'package:mobile/views/pomodoro/widgets/distraction_lock_view.dart';
 import 'package:mobile/views/pomodoro/widgets/timer_controls.dart';
 import 'package:provider/provider.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
+import 'package:wakelock_plus_platform_interface/wakelock_plus_platform_interface.dart';
+
+class _FakeWakelockPlatform extends WakelockPlusPlatformInterface {
+  final List<bool> toggles = [];
+
+  @override
+  Future<void> toggle({required bool enable}) async {
+    toggles.add(enable);
+  }
+
+  @override
+  Future<bool> get enabled async => toggles.isNotEmpty && toggles.last;
+}
 
 void main() {
   group('PomodoroProvider Unit Tests', () {
@@ -46,7 +60,8 @@ void main() {
       expect(pomodoro.formattedTime, '25:00');
     });
 
-    test('switchMode updates mode and resets countdown to respective duration', () {
+    test('switchMode updates mode and resets countdown to respective duration',
+        () {
       final pomodoro = PomodoroProvider();
 
       // Nghỉ ngắn: 5 phút
@@ -87,7 +102,9 @@ void main() {
       expect(pomodoro.formattedTime, '30:00');
     });
 
-    test('Countdown completion saves to SQLite and updates DisciplineProvider (Acceptance Criteria)', () async {
+    test(
+        'Countdown completion saves to SQLite and updates DisciplineProvider (Acceptance Criteria)',
+        () async {
       final discipline = DisciplineProvider();
       final initialStreak = discipline.currentStreak;
       final pomodoro = PomodoroProvider(disciplineProvider: discipline);
@@ -135,7 +152,8 @@ void main() {
           ChangeNotifierProvider(create: (_) => ThemeProvider()),
           ChangeNotifierProvider(create: (_) => AuthProvider()),
           ChangeNotifierProvider(create: (_) => DisciplineProvider()),
-          ChangeNotifierProvider(create: (_) => customPomodoro ?? PomodoroProvider()),
+          ChangeNotifierProvider(
+              create: (_) => customPomodoro ?? PomodoroProvider()),
         ],
         child: Consumer<ThemeProvider>(
           builder: (context, themeProvider, _) {
@@ -150,7 +168,8 @@ void main() {
       );
     }
 
-    testWidgets('CircularTimerWidget displays formatted time and mode badge', (tester) async {
+    testWidgets('CircularTimerWidget displays formatted time and mode badge',
+        (tester) async {
       final pomodoro = PomodoroProvider();
       await tester.pumpWidget(
         MultiProvider(
@@ -195,7 +214,16 @@ void main() {
       expect(pomodoro.isRunning, isTrue);
     });
 
-    testWidgets('DistractionLockView renders full screen minimal mode with quotes', (tester) async {
+    testWidgets(
+        'DistractionLockView manages wakelock and displays rotating quotes',
+        (tester) async {
+      final previousPlatform = wakelockPlusPlatformInstance;
+      final wakelockPlatform = _FakeWakelockPlatform();
+      wakelockPlusPlatformInstance = wakelockPlatform;
+      addTearDown(() {
+        wakelockPlusPlatformInstance = previousPlatform;
+      });
+
       final pomodoro = PomodoroProvider();
       await tester.pumpWidget(
         MultiProvider(
@@ -212,9 +240,27 @@ void main() {
       expect(find.text('Khóa Xao Nhãng Đang Bật'), findsOneWidget);
       expect(find.text('25:00'), findsOneWidget);
       expect(find.byIcon(Icons.format_quote_rounded), findsOneWidget);
+      expect(wakelockPlatform.toggles, [true]);
+
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+      await tester.pump();
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await tester.pump();
+      expect(wakelockPlatform.toggles, [true, false, true]);
+
+      final initialQuote = pomodoro.currentQuote;
+      await tester.tap(find.text(initialQuote));
+      await tester.pump();
+      expect(pomodoro.currentQuote, isNot(initialQuote));
+      expect(find.text(pomodoro.currentQuote), findsOneWidget);
+
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump();
+      expect(wakelockPlatform.toggles.last, isFalse);
     });
 
-    testWidgets('PomodoroScreen renders properly without RenderFlex overflow', (tester) async {
+    testWidgets('PomodoroScreen renders properly without RenderFlex overflow',
+        (tester) async {
       tester.view.physicalSize = const Size(1080, 2400);
       tester.view.devicePixelRatio = 2.0;
 
