@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import 'providers/auth_provider.dart';
 import 'providers/discipline_provider.dart';
+import 'providers/pomodoro_provider.dart';
 import 'providers/theme_provider.dart';
 import 'theme/app_theme.dart';
 import 'views/auth/home_preview_screen.dart';
@@ -11,6 +12,7 @@ import 'views/auth/onboarding_screen.dart';
 import 'views/auth/register_screen.dart';
 import 'views/auth/splash_screen.dart';
 import 'views/dashboard/dashboard_screen.dart';
+import 'views/pomodoro/pomodoro_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,6 +22,7 @@ void main() {
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => DisciplineProvider()),
+        ChangeNotifierProvider(create: (_) => PomodoroProvider()),
       ],
       child: const StudyMateApp(),
     ),
@@ -46,6 +49,7 @@ class StudyMateApp extends StatelessWidget {
       routes: {
         '/': (context) => const DashboardScreen(),
         '/dashboard': (context) => const DashboardScreen(),
+        '/pomodoro': (context) => const PomodoroScreen(),
         '/splash': (context) => const SplashScreen(),
         '/onboarding': (context) => const OnboardingScreen(),
         '/login': (context) => const LoginScreen(),

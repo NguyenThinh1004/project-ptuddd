@@ -140,6 +140,16 @@ class DashboardScreen extends StatelessWidget {
               onTap: () => Navigator.of(context).pop(),
             ),
             ListTile(
+              leading: const Icon(Icons.timer_rounded, color: Color(0xFFEA580C)),
+              title: const Text('Đồng Hồ Focus Pomodoro ⏱️',
+                  style: TextStyle(fontWeight: FontWeight.w700)),
+              subtitle: const Text('25p tập trung + 5p nghỉ & Khóa xao nhãng', style: TextStyle(fontSize: 11)),
+              onTap: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).pushNamed('/pomodoro');
+              },
+            ),
+            ListTile(
               leading: const Icon(Icons.auto_stories_rounded, color: Color(0xFF4F46E5)),
               title: const Text('Màn hình Splash Logo'),
               subtitle: const Text('Hiệu ứng chuyển cảnh mượt mà', style: TextStyle(fontSize: 11)),
@@ -362,6 +372,23 @@ class DashboardScreen extends StatelessWidget {
                       onPressed: () => _onCompleteSessionPressed(context),
                       icon: const Icon(Icons.play_circle_fill_rounded),
                       label: const Text('Hoàn thành 1 phiên học (+25 phút)'),
+                    ),
+                    const SizedBox(height: 8),
+                    OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: const Color(0xFFEA580C),
+                        side: const BorderSide(color: Color(0xFFEA580C)),
+                        minimumSize: const Size(double.infinity, 46),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      onPressed: () => Navigator.of(context).pushNamed('/pomodoro'),
+                      icon: const Icon(Icons.timer_rounded, size: 20),
+                      label: const Text(
+                        'Mở Đồng Hồ Focus Pomodoro & Khóa Xao Nhãng',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
                     ),
                     const SizedBox(height: 8),
                     Center(

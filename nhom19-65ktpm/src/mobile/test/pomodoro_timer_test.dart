@@ -1,0 +1,231 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mobile/providers/auth_provider.dart';
+import 'package:mobile/providers/discipline_provider.dart';
+import 'package:mobile/providers/pomodoro_provider.dart';
+import 'package:mobile/providers/theme_provider.dart';
+import 'package:mobile/services/pomodoro_database_helper.dart';
+import 'package:mobile/theme/app_theme.dart';
+import 'package:mobile/views/pomodoro/pomodoro_screen.dart';
+import 'package:mobile/views/pomodoro/widgets/circular_timer_widget.dart';
+import 'package:mobile/views/pomodoro/widgets/distraction_lock_view.dart';
+import 'package:mobile/views/pomodoro/widgets/timer_controls.dart';
+import 'package:provider/provider.dart';
+
+void main() {
+  group('PomodoroProvider Unit Tests', () {
+    test('Initial state is 25 minutes focus mode', () {
+      final pomodoro = PomodoroProvider();
+      expect(pomodoro.currentMode, PomodoroMode.focus);
+      expect(pomodoro.remainingSeconds, 25 * 60);
+      expect(pomodoro.totalSeconds, 25 * 60);
+      expect(pomodoro.formattedTime, '25:00');
+      expect(pomodoro.isRunning, isFalse);
+      expect(pomodoro.isPaused, isFalse);
+    });
+
+    test('startTimer, pauseTimer, resumeTimer and resetTimer', () async {
+      final pomodoro = PomodoroProvider();
+
+      pomodoro.startTimer();
+      expect(pomodoro.isRunning, isTrue);
+      expect(pomodoro.isPaused, isFalse);
+
+      pomodoro.pauseTimer();
+      expect(pomodoro.isRunning, isTrue);
+      expect(pomodoro.isPaused, isTrue);
+
+      pomodoro.resumeTimer();
+      expect(pomodoro.isRunning, isTrue);
+      expect(pomodoro.isPaused, isFalse);
+
+      pomodoro.resetTimer();
+      expect(pomodoro.isRunning, isFalse);
+      expect(pomodoro.isPaused, isFalse);
+      expect(pomodoro.remainingSeconds, 25 * 60);
+      expect(pomodoro.formattedTime, '25:00');
+    });
+
+    test('switchMode updates mode and resets countdown to respective duration', () {
+      final pomodoro = PomodoroProvider();
+
+      // Nghỉ ngắn: 5 phút
+      pomodoro.switchMode(PomodoroMode.shortBreak);
+      expect(pomodoro.currentMode, PomodoroMode.shortBreak);
+      expect(pomodoro.remainingSeconds, 5 * 60);
+      expect(pomodoro.formattedTime, '05:00');
+
+      // Nghỉ dài: 15 phút
+      pomodoro.switchMode(PomodoroMode.longBreak);
+      expect(pomodoro.currentMode, PomodoroMode.longBreak);
+      expect(pomodoro.remainingSeconds, 15 * 60);
+      expect(pomodoro.formattedTime, '15:00');
+
+      // Quay lại tập trung: 25 phút
+      pomodoro.switchMode(PomodoroMode.focus);
+      expect(pomodoro.currentMode, PomodoroMode.focus);
+      expect(pomodoro.remainingSeconds, 25 * 60);
+      expect(pomodoro.formattedTime, '25:00');
+    });
+
+    test('updateSettings modifies custom durations', () {
+      final pomodoro = PomodoroProvider();
+
+      pomodoro.updateSettings(
+        focusMinutes: 30,
+        shortBreakMinutes: 10,
+        longBreakMinutes: 20,
+        soundEnabled: false,
+        distractionLock: true,
+      );
+
+      expect(pomodoro.focusDurationMinutes, 30);
+      expect(pomodoro.shortBreakDurationMinutes, 10);
+      expect(pomodoro.longBreakDurationMinutes, 20);
+      expect(pomodoro.isSoundEnabled, isFalse);
+      expect(pomodoro.isDistractionLockEnabled, isTrue);
+      expect(pomodoro.formattedTime, '30:00');
+    });
+
+    test('Countdown completion saves to SQLite and updates DisciplineProvider (Acceptance Criteria)', () async {
+      final discipline = DisciplineProvider();
+      final initialStreak = discipline.currentStreak;
+      final pomodoro = PomodoroProvider(disciplineProvider: discipline);
+
+      // Đặt 1 giây cuối để test hoàn thành
+      pomodoro.setRemainingSecondsForTesting(1);
+      pomodoro.startTimer();
+
+      // Đợi timer tick 1 giây
+      await Future.delayed(const Duration(milliseconds: 1200));
+
+      // Kiểm tra tự động lưu SQLite
+      final sessions = await PomodoroDatabaseHelper.instance.getAllSessions();
+      expect(sessions.isNotEmpty, isTrue);
+
+      // Kiểm tra DisciplineProvider được cập nhật
+      expect(discipline.todayMinutesLearned, greaterThan(25));
+    });
+  });
+
+  group('PomodoroDatabaseHelper Tests', () {
+    test('insertSession and getAllSessions work correctly', () async {
+      final helper = PomodoroDatabaseHelper.instance;
+      await helper.initDatabase();
+
+      final record = PomodoroRecord(
+        mode: 'focus',
+        durationMinutes: 25,
+        completedAt: DateTime.now(),
+        quote: 'Thử nghiệm tập trung',
+      );
+
+      final id = await helper.insertSession(record);
+      expect(id, greaterThan(0));
+
+      final allSessions = await helper.getAllSessions();
+      expect(allSessions.any((s) => s.quote == 'Thử nghiệm tập trung'), isTrue);
+    });
+  });
+
+  group('Pomodoro Widget & UI Tests', () {
+    Widget createPomodoroTestApp({PomodoroProvider? customPomodoro}) {
+      return MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (_) => ThemeProvider()),
+          ChangeNotifierProvider(create: (_) => AuthProvider()),
+          ChangeNotifierProvider(create: (_) => DisciplineProvider()),
+          ChangeNotifierProvider(create: (_) => customPomodoro ?? PomodoroProvider()),
+        ],
+        child: Consumer<ThemeProvider>(
+          builder: (context, themeProvider, _) {
+            return MaterialApp(
+              theme: AppTheme.lightTheme,
+              darkTheme: AppTheme.darkTheme,
+              themeMode: themeProvider.themeMode,
+              home: const PomodoroScreen(),
+            );
+          },
+        ),
+      );
+    }
+
+    testWidgets('CircularTimerWidget displays formatted time and mode badge', (tester) async {
+      final pomodoro = PomodoroProvider();
+      await tester.pumpWidget(
+        MultiProvider(
+          providers: [
+            ChangeNotifierProvider.value(value: pomodoro),
+          ],
+          child: const MaterialApp(
+            home: Scaffold(body: CircularTimerWidget()),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('25:00'), findsOneWidget);
+      expect(find.text('Phiên Tập Trung'), findsOneWidget);
+    });
+
+    testWidgets('TimerControls toggles Start and Pause', (tester) async {
+      final pomodoro = PomodoroProvider();
+      await tester.pumpWidget(
+        MultiProvider(
+          providers: [
+            ChangeNotifierProvider.value(value: pomodoro),
+          ],
+          child: MaterialApp(
+            home: Scaffold(
+              body: TimerControls(onOpenSettings: () {}),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byIcon(Icons.play_arrow_rounded), findsOneWidget);
+      expect(find.byIcon(Icons.refresh_rounded), findsOneWidget);
+      expect(find.byIcon(Icons.skip_next_rounded), findsOneWidget);
+
+      // Bấm nút Start
+      await tester.tap(find.byIcon(Icons.play_arrow_rounded));
+      await tester.pumpAndSettle();
+
+      expect(pomodoro.isRunning, isTrue);
+    });
+
+    testWidgets('DistractionLockView renders full screen minimal mode with quotes', (tester) async {
+      final pomodoro = PomodoroProvider();
+      await tester.pumpWidget(
+        MultiProvider(
+          providers: [
+            ChangeNotifierProvider.value(value: pomodoro),
+          ],
+          child: MaterialApp(
+            home: DistractionLockView(onUnlock: () {}),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Khóa Xao Nhãng Đang Bật'), findsOneWidget);
+      expect(find.text('25:00'), findsOneWidget);
+      expect(find.byIcon(Icons.format_quote_rounded), findsOneWidget);
+    });
+
+    testWidgets('PomodoroScreen renders properly without RenderFlex overflow', (tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 2.0;
+
+      await tester.pumpWidget(createPomodoroTestApp());
+      await tester.pumpAndSettle();
+
+      expect(find.text('Đồng Hồ Focus Pomodoro'), findsOneWidget);
+      expect(find.text('25:00'), findsOneWidget);
+      expect(find.text('Nhật Ký Phiên Học SQLite'), findsOneWidget);
+
+      addTearDown(tester.view.resetPhysicalSize);
+    });
+  });
+}
