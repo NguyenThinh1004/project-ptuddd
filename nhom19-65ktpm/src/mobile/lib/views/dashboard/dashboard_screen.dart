@@ -82,6 +82,112 @@ class DashboardScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
+      drawer: Drawer(
+        backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            DrawerHeader(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    colorScheme.primary,
+                    const Color(0xFF8B5CF6),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  CircleAvatar(
+                    radius: 28,
+                    backgroundColor: Colors.white.withOpacity(0.2),
+                    child: const Icon(
+                      Icons.person_rounded,
+                      size: 34,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    userName,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  Text(
+                    'daothiyen@e.tlu.edu.vn • Nhóm 19 - 65KTPM',
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.85),
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            ListTile(
+              leading: Icon(Icons.dashboard_rounded, color: colorScheme.primary),
+              title: const Text('Dashboard Kỷ Luật Cá Nhân',
+                  style: TextStyle(fontWeight: FontWeight.w700)),
+              selected: true,
+              selectedTileColor: colorScheme.primary.withOpacity(0.1),
+              onTap: () => Navigator.of(context).pop(),
+            ),
+            ListTile(
+              leading: const Icon(Icons.auto_stories_rounded, color: Color(0xFF4F46E5)),
+              title: const Text('Màn hình Splash Logo'),
+              subtitle: const Text('Hiệu ứng chuyển cảnh mượt mà', style: TextStyle(fontSize: 11)),
+              onTap: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).pushNamed('/splash');
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.view_carousel_rounded, color: Color(0xFF10B981)),
+              title: const Text('Onboarding Giới Thiệu (3 bước)'),
+              subtitle: const Text('AI Speech, Pomodoro, Flashcards', style: TextStyle(fontSize: 11)),
+              onTap: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).pushNamed('/onboarding');
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.lock_outline_rounded, color: Color(0xFFEA580C)),
+              title: const Text('Đăng nhập / Đăng ký'),
+              subtitle: const Text('Form xác thực có Validation', style: TextStyle(fontSize: 11)),
+              onTap: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).pushNamed('/login');
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.checklist_rounded, color: Color(0xFF6366F1)),
+              title: const Text('Báo cáo Nghiệm thu Sprint 1'),
+              subtitle: const Text('Tổng quan các tiêu chí đã hoàn thành', style: TextStyle(fontSize: 11)),
+              onTap: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).pushNamed('/home');
+              },
+            ),
+            const Divider(),
+            ListTile(
+              leading: Icon(
+                isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
+                color: isDark ? const Color(0xFFFBBF24) : const Color(0xFF475569),
+              ),
+              title: Text(isDark ? 'Chuyển sang giao diện Sáng' : 'Chuyển sang giao diện Tối'),
+              onTap: () {
+                Provider.of<ThemeProvider>(context, listen: false).toggleTheme();
+              },
+            ),
+          ],
+        ),
+      ),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,

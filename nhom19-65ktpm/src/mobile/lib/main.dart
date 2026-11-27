@@ -27,7 +27,7 @@ void main() {
 }
 
 /// Ứng dụng chính StudyMate AI
-/// Quản lý giao diện Material 3 thích ứng Light / Dark Theme linh hoạt
+/// Màn hình chính mặc định hiển thị thẳng vào Dashboard cá nhân (Kỷ luật, Streak, Heatmap)
 class StudyMateApp extends StatelessWidget {
   const StudyMateApp({super.key});
 
@@ -41,14 +41,16 @@ class StudyMateApp extends StatelessWidget {
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: themeProvider.themeMode,
-      initialRoute: '/',
+      // Màn hình chính hiển thị thẳng vào Dashboard cá nhân
+      initialRoute: '/dashboard',
       routes: {
-        '/': (context) => const SplashScreen(),
+        '/': (context) => const DashboardScreen(),
+        '/dashboard': (context) => const DashboardScreen(),
+        '/splash': (context) => const SplashScreen(),
         '/onboarding': (context) => const OnboardingScreen(),
         '/login': (context) => const LoginScreen(),
         '/register': (context) => const RegisterScreen(),
         '/home': (context) => const HomePreviewScreen(),
-        '/dashboard': (context) => const DashboardScreen(),
       },
     );
   }
