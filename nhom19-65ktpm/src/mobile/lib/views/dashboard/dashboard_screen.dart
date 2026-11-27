@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/discipline_provider.dart';
+import '../../providers/theme_provider.dart';
 import '../auth/theme_toggle_button.dart';
 import 'widgets/date_selector_strip.dart';
 import 'widgets/daily_goal_progress_ring.dart';
