@@ -200,7 +200,7 @@ class PomodoroScreen extends StatelessWidget {
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
-                                  'Nhật Ký Phiên Học ',
+                                  'Nhật Ký Phiên Học SQLite',
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: TextStyle(

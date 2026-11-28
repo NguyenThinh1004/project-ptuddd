@@ -22,6 +22,11 @@ Backend **Python 3.12 + FastAPI** của hệ thống **StudyMate AI**, cung cấ
 - `POST /api/speech/assess` — Alias tương thích ngược cho Flutter (`correct` | `close` | `wrong`).
 - `GET /health` — Kiểm tra trạng thái CMUDict và Whisper.
 
+Flutter gọi `/api/speech/evaluate` bằng multipart gồm tệp WAV và `target_text`.
+Mặc định API base URL là `http://127.0.0.1:8000` trên web/desktop và
+`http://10.0.2.2:8000` trên Android Emulator. Có thể ghi đè khi chạy Flutter:
+`--dart-define=STUDYMATE_API_BASE_URL=https://<backend-host>`.
+
 ## Cài đặt & Chạy local (Python 3.12 + `uv`)
 
 ```powershell

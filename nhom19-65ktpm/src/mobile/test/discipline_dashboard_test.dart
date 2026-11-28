@@ -9,6 +9,7 @@ import 'package:mobile/views/dashboard/widgets/date_selector_strip.dart';
 import 'package:mobile/views/dashboard/widgets/daily_goal_progress_ring.dart';
 import 'package:mobile/views/dashboard/widgets/monthly_heatmap_grid.dart';
 import 'package:mobile/views/dashboard/widgets/streak_card.dart';
+import 'package:mobile/views/pronunciation/pronunciation_screen.dart';
 import 'package:provider/provider.dart';
 
 void main() {
@@ -24,7 +25,9 @@ void main() {
       expect(provider.remainingMinutesToday, 5);
     });
 
-    test('completeStudySession increments minutes and reactive streak updates (Acceptance Criteria)', () {
+    test(
+        'completeStudySession increments minutes and reactive streak updates (Acceptance Criteria)',
+        () {
       final provider = DisciplineProvider();
       expect(provider.currentStreak, 7);
       expect(provider.isTodayGoalCompleted, isFalse);
@@ -50,7 +53,9 @@ void main() {
       expect(provider.currentStreak, 8);
     });
 
-    test('Monthly Heatmap records contain 30 days with valid contribution levels', () {
+    test(
+        'Monthly Heatmap records contain 30 days with valid contribution levels',
+        () {
       final provider = DisciplineProvider();
       final records = provider.getMonthlyHeatmapRecords(30);
 
@@ -65,7 +70,8 @@ void main() {
       expect(records.last.level, 2);
     });
 
-    test('Date selector selects different day and generates 7 days of week', () {
+    test('Date selector selects different day and generates 7 days of week',
+        () {
       final provider = DisciplineProvider();
       final weekDates = provider.getWeekDatesForSelectedDate();
       expect(weekDates.length, 7);
@@ -88,7 +94,8 @@ void main() {
         providers: [
           ChangeNotifierProvider(create: (_) => ThemeProvider()),
           ChangeNotifierProvider(create: (_) => AuthProvider()),
-          ChangeNotifierProvider(create: (_) => customDiscipline ?? DisciplineProvider()),
+          ChangeNotifierProvider(
+              create: (_) => customDiscipline ?? DisciplineProvider()),
         ],
         child: Consumer<ThemeProvider>(
           builder: (context, themeProvider, _) {
@@ -97,13 +104,19 @@ void main() {
               darkTheme: AppTheme.darkTheme,
               themeMode: themeProvider.themeMode,
               home: const DashboardScreen(),
+              routes: {
+                '/pronunciation': (_) => const PronunciationScreen(),
+                '/flashcards': (_) =>
+                    const Scaffold(body: Text('Flashcards page')),
+              },
             );
           },
         ),
       );
     }
 
-    testWidgets('StreakCard displays flame icon and 7 days streak', (tester) async {
+    testWidgets('StreakCard displays flame icon and 7 days streak',
+        (tester) async {
       final discipline = DisciplineProvider();
       await tester.pumpWidget(
         MultiProvider(
@@ -123,7 +136,8 @@ void main() {
       expect(find.text('Kỷ lục chuỗi: 14 ngày'), findsOneWidget);
     });
 
-    testWidgets('DailyGoalProgressRing displays 25/30 minutes and 83%', (tester) async {
+    testWidgets('DailyGoalProgressRing displays 25/30 minutes and 83%',
+        (tester) async {
       final discipline = DisciplineProvider();
       await tester.pumpWidget(
         MultiProvider(
@@ -143,7 +157,9 @@ void main() {
       expect(find.text('Mục tiêu học hôm nay'), findsOneWidget);
     });
 
-    testWidgets('DateSelectorStrip displays horizontal days and handles tapping', (tester) async {
+    testWidgets(
+        'DateSelectorStrip displays horizontal days and handles tapping',
+        (tester) async {
       final discipline = DisciplineProvider();
       await tester.pumpWidget(
         MultiProvider(
@@ -162,7 +178,9 @@ void main() {
       expect(find.byType(DateSelectorStrip), findsOneWidget);
     });
 
-    testWidgets('MonthlyHeatmapGrid renders 30 contribution cells without overflow', (tester) async {
+    testWidgets(
+        'MonthlyHeatmapGrid renders 30 contribution cells without overflow',
+        (tester) async {
       final discipline = DisciplineProvider();
       await tester.pumpWidget(
         MultiProvider(
@@ -170,7 +188,8 @@ void main() {
             ChangeNotifierProvider.value(value: discipline),
           ],
           child: const MaterialApp(
-            home: Scaffold(body: SingleChildScrollView(child: MonthlyHeatmapGrid())),
+            home: Scaffold(
+                body: SingleChildScrollView(child: MonthlyHeatmapGrid())),
           ),
         ),
       );
@@ -182,13 +201,15 @@ void main() {
       expect(find.text('Nhiều'), findsOneWidget);
     });
 
-    testWidgets('DashboardScreen full view updates streak and progress when completing session (Acceptance Criteria)',
+    testWidgets(
+        'DashboardScreen full view updates streak and progress when completing session (Acceptance Criteria)',
         (tester) async {
       tester.view.physicalSize = const Size(720, 1600);
       tester.view.devicePixelRatio = 2.0;
 
       final discipline = DisciplineProvider();
-      await tester.pumpWidget(createDashboardTestApp(customDiscipline: discipline));
+      await tester
+          .pumpWidget(createDashboardTestApp(customDiscipline: discipline));
       await tester.pump();
 
       // Kiểm tra trạng thái ban đầu: 7 ngày, 83%, 25/30 phút
@@ -216,6 +237,56 @@ void main() {
       // Hiển thị thông báo SnackBar chúc mừng
       expect(find.byType(SnackBar), findsOneWidget);
 
+      addTearDown(tester.view.resetPhysicalSize);
+    });
+
+    testWidgets('Dashboard opens AI pronunciation from the main action card',
+        (tester) async {
+      tester.view.physicalSize = const Size(720, 1600);
+      tester.view.devicePixelRatio = 2.0;
+
+      await tester.pumpWidget(createDashboardTestApp());
+      await tester.pump(const Duration(milliseconds: 500));
+
+      final pronunciationButton = find.widgetWithText(
+        OutlinedButton,
+        'Luyện phát âm AI',
+      );
+      expect(pronunciationButton, findsOneWidget);
+      await tester.ensureVisible(pronunciationButton);
+      await tester.pump();
+      await tester.tap(pronunciationButton);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Câu mẫu'), findsOneWidget);
+      expect(
+        find.text('Practice makes perfect every single day.'),
+        findsOneWidget,
+      );
+      expect(tester.takeException(), isNull);
+
+      addTearDown(tester.view.resetPhysicalSize);
+    });
+
+    testWidgets('Dashboard opens Flashcards from the main action card',
+        (tester) async {
+      tester.view.physicalSize = const Size(720, 1600);
+      tester.view.devicePixelRatio = 2.0;
+
+      await tester.pumpWidget(createDashboardTestApp());
+      await tester.pump(const Duration(milliseconds: 500));
+
+      final flashcardsButton = find.widgetWithText(
+        OutlinedButton,
+        'Flashcard 3D & Quiz',
+      );
+      expect(flashcardsButton, findsOneWidget);
+      await tester.ensureVisible(flashcardsButton);
+      await tester.pump();
+      await tester.tap(flashcardsButton);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Flashcards page'), findsOneWidget);
       addTearDown(tester.view.resetPhysicalSize);
     });
   });

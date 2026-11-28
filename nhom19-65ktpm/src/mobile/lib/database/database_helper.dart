@@ -13,7 +13,7 @@ class DatabaseHelper {
 
   static final DatabaseHelper instance = DatabaseHelper._();
 
-  static const int _databaseVersion = 2;
+  static const int _databaseVersion = 3;
   static const String _databaseName = 'studymate.db';
 
   Database? _database;
@@ -70,6 +70,8 @@ class DatabaseHelper {
         subject_id INTEGER NOT NULL,
         front_text TEXT NOT NULL,
         back_text TEXT NOT NULL,
+        ipa TEXT,
+        example TEXT,
         repetition_level INTEGER NOT NULL DEFAULT 0,
         repetitions INTEGER NOT NULL DEFAULT 0,
         ease_factor REAL NOT NULL DEFAULT 2.5,
@@ -142,8 +144,10 @@ class DatabaseHelper {
       ''');
     }
 
-    // Cac migration Version 3 tro len
-    // se duoc bo sung tai day.
+    if (oldVersion < 3 && newVersion >= 3) {
+      await db.execute('ALTER TABLE flashcards ADD COLUMN ipa TEXT');
+      await db.execute('ALTER TABLE flashcards ADD COLUMN example TEXT');
+    }
   }
 
   // ==========================================
@@ -170,16 +174,31 @@ class DatabaseHelper {
     // 10 flashcards tieng Anh
 
     final words = <List<String>>[
-      ['Apple', 'Qua tao'],
-      ['Book', 'Quyen sach'],
-      ['School', 'Truong hoc'],
-      ['Teacher', 'Giao vien'],
-      ['Student', 'Hoc sinh'],
-      ['Computer', 'May tinh'],
-      ['Knowledge', 'Kien thuc'],
-      ['Discipline', 'Ky luat'],
-      ['Success', 'Thanh cong'],
-      ['Practice', 'Luyen tap'],
+      ['Apple', 'Quả táo', '/ˈæp.əl/', 'I ate an apple.'],
+      ['Book', 'Quyển sách', '/bʊk/', 'She opened a book.'],
+      ['School', 'Trường học', '/skuːl/', 'The children walk to school.'],
+      ['Teacher', 'Giáo viên', '/ˈtiː.tʃɚ/', 'Our teacher is very kind.'],
+      ['Student', 'Học sinh', '/ˈstuː.dənt/', 'The student asks a question.'],
+      [
+        'Computer',
+        'Máy tính',
+        '/kəmˈpjuː.t̬ɚ/',
+        'I use my computer to study.',
+      ],
+      [
+        'Knowledge',
+        'Kiến thức',
+        '/ˈnɑː.lɪdʒ/',
+        'Reading helps build knowledge.',
+      ],
+      [
+        'Discipline',
+        'Kỷ luật',
+        '/ˈdɪs.ə.plɪn/',
+        'Discipline helps me reach my goals.',
+      ],
+      ['Success', 'Thành công', '/səkˈses/', 'Practice is a key to success.'],
+      ['Practice', 'Luyện tập', '/ˈpræk.tɪs/', 'Practice makes perfect.'],
     ];
 
     // Ngay on tap dau tien
@@ -193,6 +212,8 @@ class DatabaseHelper {
         'subject_id': englishId,
         'front_text': word[0],
         'back_text': word[1],
+        'ipa': word[2],
+        'example': word[3],
         'next_review_date': today,
       });
     }
@@ -211,6 +232,17 @@ class DatabaseHelper {
     );
   }
 
+  Future<List<Map<String, Object?>>> getSubjectsWithCardCounts() async {
+    final db = await database;
+    return db.rawQuery('''
+      SELECT subjects.*, COUNT(flashcards.id) AS card_count
+      FROM subjects
+      LEFT JOIN flashcards ON flashcards.subject_id = subjects.id
+      GROUP BY subjects.id
+      ORDER BY subjects.id ASC
+    ''');
+  }
+
   // ==========================================
   // 7. LAY DANH SACH FLASHCARDS
   // ==========================================
@@ -221,6 +253,129 @@ class DatabaseHelper {
     return db.query(
       'flashcards',
       orderBy: 'id ASC',
+    );
+  }
+
+  Future<List<Map<String, Object?>>> getFlashcardsForSubject(
+    int subjectId,
+  ) async {
+    final db = await database;
+    return db.query(
+      'flashcards',
+      where: 'subject_id = ?',
+      whereArgs: [subjectId],
+      orderBy: 'id ASC',
+    );
+  }
+
+  Future<int> insertSubject(String name) async {
+    final cleanedName = name.trim();
+    if (cleanedName.isEmpty) {
+      throw ArgumentError.value(name, 'name', 'Tên môn học không được để trống.');
+    }
+
+    final db = await database;
+    return db.insert('subjects', {
+      'name': cleanedName,
+      'color': '#4F46E5',
+      'icon': 'auto_stories',
+    });
+  }
+
+  Future<void> updateSubject({
+    required int subjectId,
+    required String name,
+  }) async {
+    final cleanedName = name.trim();
+    if (cleanedName.isEmpty) {
+      throw ArgumentError.value(name, 'name', 'Tên môn học không được để trống.');
+    }
+
+    final db = await database;
+    final updatedRows = await db.update(
+      'subjects',
+      {'name': cleanedName},
+      where: 'id = ?',
+      whereArgs: [subjectId],
+    );
+    if (updatedRows == 0) {
+      throw StateError('Không tìm thấy môn học ID: $subjectId');
+    }
+  }
+
+  Future<void> deleteSubject(int subjectId) async {
+    final db = await database;
+    await db.delete(
+      'subjects',
+      where: 'id = ?',
+      whereArgs: [subjectId],
+    );
+  }
+
+  Future<int> insertFlashcard({
+    required int subjectId,
+    required String front,
+    required String back,
+    String? ipa,
+    String? example,
+    DateTime? nextReviewDate,
+  }) async {
+    final cleanedFront = front.trim();
+    final cleanedBack = back.trim();
+    if (cleanedFront.isEmpty || cleanedBack.isEmpty) {
+      throw ArgumentError('Mặt trước và mặt sau thẻ không được để trống.');
+    }
+
+    final dueDate = (nextReviewDate ?? DateTime.now())
+        .toIso8601String()
+        .substring(0, 10);
+    final db = await database;
+    return db.insert('flashcards', {
+      'subject_id': subjectId,
+      'front_text': cleanedFront,
+      'back_text': cleanedBack,
+      'ipa': ipa?.trim().isEmpty == true ? null : ipa?.trim(),
+      'example': example?.trim().isEmpty == true ? null : example?.trim(),
+      'next_review_date': dueDate,
+    });
+  }
+
+  Future<void> updateFlashcard({
+    required int flashcardId,
+    required String front,
+    required String back,
+    String? ipa,
+    String? example,
+  }) async {
+    final cleanedFront = front.trim();
+    final cleanedBack = back.trim();
+    if (cleanedFront.isEmpty || cleanedBack.isEmpty) {
+      throw ArgumentError('Mặt trước và mặt sau thẻ không được để trống.');
+    }
+
+    final db = await database;
+    final updatedRows = await db.update(
+      'flashcards',
+      {
+        'front_text': cleanedFront,
+        'back_text': cleanedBack,
+        'ipa': ipa?.trim().isEmpty == true ? null : ipa?.trim(),
+        'example': example?.trim().isEmpty == true ? null : example?.trim(),
+      },
+      where: 'id = ?',
+      whereArgs: [flashcardId],
+    );
+    if (updatedRows == 0) {
+      throw StateError('Không tìm thấy flashcard ID: $flashcardId');
+    }
+  }
+
+  Future<void> deleteFlashcard(int flashcardId) async {
+    final db = await database;
+    await db.delete(
+      'flashcards',
+      where: 'id = ?',
+      whereArgs: [flashcardId],
     );
   }
 

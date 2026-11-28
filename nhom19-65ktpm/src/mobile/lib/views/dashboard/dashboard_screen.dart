@@ -82,7 +82,8 @@ class DashboardScreen extends StatelessWidget {
         : 'Đào Thị Yến';
 
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
+      backgroundColor:
+          isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
       drawer: Drawer(
         backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
         child: ListView(
@@ -132,7 +133,8 @@ class DashboardScreen extends StatelessWidget {
               ),
             ),
             ListTile(
-              leading: Icon(Icons.dashboard_rounded, color: colorScheme.primary),
+              leading:
+                  Icon(Icons.dashboard_rounded, color: colorScheme.primary),
               title: const Text('Dashboard Kỷ Luật Cá Nhân',
                   style: TextStyle(fontWeight: FontWeight.w700)),
               selected: true,
@@ -140,46 +142,90 @@ class DashboardScreen extends StatelessWidget {
               onTap: () => Navigator.of(context).pop(),
             ),
             ListTile(
-              leading: const Icon(Icons.timer_rounded, color: Color(0xFFEA580C)),
+              leading:
+                  const Icon(Icons.timer_rounded, color: Color(0xFFEA580C)),
               title: const Text('Đồng Hồ Focus Pomodoro ⏱️',
                   style: TextStyle(fontWeight: FontWeight.w700)),
-              subtitle: const Text('25p tập trung + 5p nghỉ & Khóa xao nhãng', style: TextStyle(fontSize: 11)),
+              subtitle: const Text('25p tập trung + 5p nghỉ & Khóa xao nhãng',
+                  style: TextStyle(fontSize: 11)),
               onTap: () {
                 Navigator.of(context).pop();
                 Navigator.of(context).pushNamed('/pomodoro');
               },
             ),
             ListTile(
-              leading: const Icon(Icons.auto_stories_rounded, color: Color(0xFF4F46E5)),
+              leading: const Icon(Icons.record_voice_over_rounded,
+                  color: Color(0xFF4F46E5)),
+              title: const Text(
+                'Luyện phát âm AI',
+                style: TextStyle(fontWeight: FontWeight.w700),
+              ),
+              subtitle: const Text(
+                'Ghi âm, xem IPA và chấm điểm từng từ',
+                style: TextStyle(fontSize: 11),
+              ),
+              onTap: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).pushNamed('/pronunciation');
+              },
+            ),
+            ListTile(
+              leading: const Icon(
+                Icons.style_rounded,
+                color: Color(0xFF059669),
+              ),
+              title: const Text(
+                'Flashcard 3D & Quiz',
+                style: TextStyle(fontWeight: FontWeight.w700),
+              ),
+              subtitle: const Text(
+                'Quản lý thẻ, ôn tập SM-2 và làm quiz',
+                style: TextStyle(fontSize: 11),
+              ),
+              onTap: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).pushNamed('/flashcards');
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.auto_stories_rounded,
+                  color: Color(0xFF4F46E5)),
               title: const Text('Màn hình Splash Logo'),
-              subtitle: const Text('Hiệu ứng chuyển cảnh mượt mà', style: TextStyle(fontSize: 11)),
+              subtitle: const Text('Hiệu ứng chuyển cảnh mượt mà',
+                  style: TextStyle(fontSize: 11)),
               onTap: () {
                 Navigator.of(context).pop();
                 Navigator.of(context).pushNamed('/splash');
               },
             ),
             ListTile(
-              leading: const Icon(Icons.view_carousel_rounded, color: Color(0xFF10B981)),
+              leading: const Icon(Icons.view_carousel_rounded,
+                  color: Color(0xFF10B981)),
               title: const Text('Onboarding Giới Thiệu (3 bước)'),
-              subtitle: const Text('AI Speech, Pomodoro, Flashcards', style: TextStyle(fontSize: 11)),
+              subtitle: const Text('AI Speech, Pomodoro, Flashcards',
+                  style: TextStyle(fontSize: 11)),
               onTap: () {
                 Navigator.of(context).pop();
                 Navigator.of(context).pushNamed('/onboarding');
               },
             ),
             ListTile(
-              leading: const Icon(Icons.lock_outline_rounded, color: Color(0xFFEA580C)),
+              leading: const Icon(Icons.lock_outline_rounded,
+                  color: Color(0xFFEA580C)),
               title: const Text('Đăng nhập / Đăng ký'),
-              subtitle: const Text('Form xác thực có Validation', style: TextStyle(fontSize: 11)),
+              subtitle: const Text('Form xác thực có Validation',
+                  style: TextStyle(fontSize: 11)),
               onTap: () {
                 Navigator.of(context).pop();
                 Navigator.of(context).pushNamed('/login');
               },
             ),
             ListTile(
-              leading: const Icon(Icons.checklist_rounded, color: Color(0xFF6366F1)),
+              leading:
+                  const Icon(Icons.checklist_rounded, color: Color(0xFF6366F1)),
               title: const Text('Báo cáo Nghiệm thu Sprint 1'),
-              subtitle: const Text('Tổng quan các tiêu chí đã hoàn thành', style: TextStyle(fontSize: 11)),
+              subtitle: const Text('Tổng quan các tiêu chí đã hoàn thành',
+                  style: TextStyle(fontSize: 11)),
               onTap: () {
                 Navigator.of(context).pop();
                 Navigator.of(context).pushNamed('/home');
@@ -189,11 +235,15 @@ class DashboardScreen extends StatelessWidget {
             ListTile(
               leading: Icon(
                 isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
-                color: isDark ? const Color(0xFFFBBF24) : const Color(0xFF475569),
+                color:
+                    isDark ? const Color(0xFFFBBF24) : const Color(0xFF475569),
               ),
-              title: Text(isDark ? 'Chuyển sang giao diện Sáng' : 'Chuyển sang giao diện Tối'),
+              title: Text(isDark
+                  ? 'Chuyển sang giao diện Sáng'
+                  : 'Chuyển sang giao diện Tối'),
               onTap: () {
-                Provider.of<ThemeProvider>(context, listen: false).toggleTheme();
+                Provider.of<ThemeProvider>(context, listen: false)
+                    .toggleTheme();
               },
             ),
           ],
@@ -346,7 +396,9 @@ class DashboardScreen extends StatelessWidget {
                   color: isDark ? const Color(0xFF1E293B) : Colors.white,
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
-                    color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                    color: isDark
+                        ? const Color(0xFF334155)
+                        : const Color(0xFFE2E8F0),
                   ),
                 ),
                 child: Column(
@@ -397,10 +449,56 @@ class DashboardScreen extends StatelessWidget {
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      onPressed: () => Navigator.of(context).pushNamed('/pomodoro'),
+                      onPressed: () =>
+                          Navigator.of(context).pushNamed('/pomodoro'),
                       icon: const Icon(Icons.timer_rounded, size: 20),
                       label: const Text(
                         'Mở Đồng Hồ Focus Pomodoro & Khóa Xao Nhãng',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: const Color(0xFF4F46E5),
+                        side: const BorderSide(color: Color(0xFF4F46E5)),
+                        minimumSize: const Size(double.infinity, 46),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      onPressed: () =>
+                          Navigator.of(context).pushNamed('/pronunciation'),
+                      icon: const Icon(
+                        Icons.record_voice_over_rounded,
+                        size: 20,
+                      ),
+                      label: const Text(
+                        'Luyện phát âm AI',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: const Color(0xFF059669),
+                        side: const BorderSide(color: Color(0xFF059669)),
+                        minimumSize: const Size(double.infinity, 46),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      onPressed: () =>
+                          Navigator.of(context).pushNamed('/flashcards'),
+                      icon: const Icon(Icons.style_rounded, size: 20),
+                      label: const Text(
+                        'Flashcard 3D & Quiz',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
                     ),
@@ -412,7 +510,8 @@ class DashboardScreen extends StatelessWidget {
                         ),
                         onPressed: () => _onResetTestPressed(context),
                         icon: const Icon(Icons.refresh_rounded, size: 16),
-                        label: const Text('Đặt lại hôm nay về 0 phút để thử lại'),
+                        label:
+                            const Text('Đặt lại hôm nay về 0 phút để thử lại'),
                       ),
                     ),
                   ],
@@ -436,7 +535,9 @@ class DashboardScreen extends StatelessWidget {
                   color: isDark ? const Color(0xFF1E293B) : Colors.white,
                   borderRadius: BorderRadius.circular(24),
                   border: Border.all(
-                    color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                    color: isDark
+                        ? const Color(0xFF334155)
+                        : const Color(0xFFE2E8F0),
                   ),
                 ),
                 child: Column(
@@ -463,7 +564,9 @@ class DashboardScreen extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
-                            color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                            color: isDark
+                                ? const Color(0xFF94A3B8)
+                                : const Color(0xFF64748B),
                           ),
                         ),
                       ],
@@ -476,7 +579,9 @@ class DashboardScreen extends StatelessWidget {
                           child: Text(
                             'Chưa có phiên học nào hôm nay. Hãy bắt đầu ngay!',
                             style: TextStyle(
-                              color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                              color: isDark
+                                  ? const Color(0xFF94A3B8)
+                                  : const Color(0xFF64748B),
                             ),
                           ),
                         ),
@@ -497,7 +602,8 @@ class DashboardScreen extends StatelessWidget {
                               Container(
                                 padding: const EdgeInsets.all(8),
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFF4F46E5).withOpacity(0.12),
+                                  color:
+                                      const Color(0xFF4F46E5).withOpacity(0.12),
                                   borderRadius: BorderRadius.circular(10),
                                 ),
                                 child: const Icon(
@@ -516,7 +622,9 @@ class DashboardScreen extends StatelessWidget {
                                       style: TextStyle(
                                         fontSize: 13.5,
                                         fontWeight: FontWeight.w700,
-                                        color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                        color: isDark
+                                            ? Colors.white
+                                            : const Color(0xFF0F172A),
                                       ),
                                     ),
                                     if (session.note.isNotEmpty)
