@@ -238,18 +238,23 @@ class DateSelectorStrip extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  isTodaySelected
-                      ? 'Hôm nay: ${discipline.todayMinutesLearned} phút học'
-                      : 'Ngày ${selectedDate.day}/${selectedDate.month}: ${discipline.getMinutesForDate(selectedDate)} phút học',
-                  style: TextStyle(
-                    fontSize: 12.5,
-                    fontWeight: FontWeight.w600,
-                    color: isDark
-                        ? const Color(0xFFCBD5E1)
-                        : const Color(0xFF475569),
+                Expanded(
+                  child: Text(
+                    isTodaySelected
+                        ? 'Hôm nay: ${discipline.todayMinutesLearned} phút học'
+                        : 'Ngày ${selectedDate.day}/${selectedDate.month}: ${discipline.getMinutesForDate(selectedDate)} phút học',
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                    style: TextStyle(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w600,
+                      color: isDark
+                          ? const Color(0xFFCBD5E1)
+                          : const Color(0xFF475569),
+                    ),
                   ),
                 ),
+                const SizedBox(width: 8),
                 Text(
                   discipline.getMinutesForDate(selectedDate) >=
                           discipline.dailyGoalMinutes

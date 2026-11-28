@@ -115,7 +115,7 @@ void main() {
           ),
         ),
       );
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       expect(find.text('7 Ngày'), findsOneWidget);
       expect(find.text('Streak 🔥'), findsOneWidget);
@@ -184,12 +184,12 @@ void main() {
 
     testWidgets('DashboardScreen full view updates streak and progress when completing session (Acceptance Criteria)',
         (tester) async {
-      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.physicalSize = const Size(720, 1600);
       tester.view.devicePixelRatio = 2.0;
 
       final discipline = DisciplineProvider();
       await tester.pumpWidget(createDashboardTestApp(customDiscipline: discipline));
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       // Kiểm tra trạng thái ban đầu: 7 ngày, 83%, 25/30 phút
       expect(find.text('7 Ngày'), findsOneWidget);
@@ -202,8 +202,11 @@ void main() {
       );
       expect(completeButton, findsOneWidget);
 
+      await tester.ensureVisible(completeButton);
+      await tester.pump();
       await tester.tap(completeButton);
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 800));
 
       // Kiểm tra phản ứng thời gian thực ngay lập tức trên UI:
       // Streak cập nhật lên 8 Ngày!

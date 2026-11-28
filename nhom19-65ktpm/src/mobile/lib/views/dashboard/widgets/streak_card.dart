@@ -123,7 +123,10 @@ class _StreakCardState extends State<StreakCard>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 4,
+                      crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
                         Text(
                           '$currentStreak Ngày',
@@ -135,7 +138,6 @@ class _StreakCardState extends State<StreakCard>
                                 : const Color(0xFFC2410C),
                           ),
                         ),
-                        const SizedBox(width: 8),
                         Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 8,
@@ -186,8 +188,8 @@ class _StreakCardState extends State<StreakCard>
           const SizedBox(height: 12),
 
           // Kỷ lục cá nhân và thống kê phụ
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 children: [
@@ -199,53 +201,60 @@ class _StreakCardState extends State<StreakCard>
                         : const Color(0xFFD97706),
                   ),
                   const SizedBox(width: 6),
-                  Text(
-                    'Kỷ lục chuỗi: $longestStreak ngày',
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: isDark
-                          ? const Color(0xFF94A3B8)
-                          : const Color(0xFF64748B),
+                  Expanded(
+                    child: Text(
+                      'Kỷ lục chuỗi: $longestStreak ngày',
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: isDark
+                            ? const Color(0xFF94A3B8)
+                            : const Color(0xFF64748B),
+                      ),
                     ),
                   ),
                 ],
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: isCompleted
-                      ? const Color(0xFF10B981).withOpacity(0.15)
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      isCompleted
-                          ? Icons.check_circle_rounded
-                          : Icons.hourglass_top_rounded,
-                      size: 16,
-                      color: isCompleted
-                          ? const Color(0xFF10B981)
-                          : (isDark
-                              ? const Color(0xFF94A3B8)
-                              : const Color(0xFF64748B)),
-                    ),
-                    const SizedBox(width: 5),
-                    Text(
-                      isCompleted ? 'Hoàn thành hôm nay' : 'Đang rèn luyện',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
+              Align(
+                alignment: Alignment.centerRight,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: isCompleted
+                        ? const Color(0xFF10B981).withOpacity(0.15)
+                        : Colors.transparent,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        isCompleted
+                            ? Icons.check_circle_rounded
+                            : Icons.hourglass_top_rounded,
+                        size: 16,
                         color: isCompleted
                             ? const Color(0xFF10B981)
                             : (isDark
                                 ? const Color(0xFF94A3B8)
                                 : const Color(0xFF64748B)),
                       ),
-                    ),
-                  ],
+                      const SizedBox(width: 5),
+                      Text(
+                        isCompleted ? 'Hoàn thành hôm nay' : 'Đang rèn luyện',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: isCompleted
+                              ? const Color(0xFF10B981)
+                              : (isDark
+                                  ? const Color(0xFF94A3B8)
+                                  : const Color(0xFF64748B)),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],
