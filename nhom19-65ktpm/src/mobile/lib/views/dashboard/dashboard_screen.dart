@@ -414,7 +414,7 @@ class DashboardScreen extends StatelessWidget {
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
-                            'Tương tác kiểm thử Nghiệm thu',
+                            'Các chức năng chính của ứng dụng',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
