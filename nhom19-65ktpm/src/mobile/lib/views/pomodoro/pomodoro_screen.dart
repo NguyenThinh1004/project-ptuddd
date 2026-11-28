@@ -45,7 +45,8 @@ class PomodoroScreen extends StatelessWidget {
     }
 
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
+      backgroundColor:
+          isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -74,7 +75,9 @@ class PomodoroScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(4),
                 decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+                  color: isDark
+                      ? const Color(0xFF1E293B)
+                      : const Color(0xFFE2E8F0),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Row(
@@ -88,17 +91,20 @@ class PomodoroScreen extends StatelessWidget {
                     ),
                     _buildModeTab(
                       context,
-                      title: 'Nghỉ ngắn (${pomodoro.shortBreakDurationMinutes}p)',
+                      title:
+                          'Nghỉ ngắn (${pomodoro.shortBreakDurationMinutes}p)',
                       mode: PomodoroMode.shortBreak,
                       activeColor: const Color(0xFF10B981),
-                      isSelected: pomodoro.currentMode == PomodoroMode.shortBreak,
+                      isSelected:
+                          pomodoro.currentMode == PomodoroMode.shortBreak,
                     ),
                     _buildModeTab(
                       context,
                       title: 'Nghỉ dài (${pomodoro.longBreakDurationMinutes}p)',
                       mode: PomodoroMode.longBreak,
                       activeColor: const Color(0xFF3B82F6),
-                      isSelected: pomodoro.currentMode == PomodoroMode.longBreak,
+                      isSelected:
+                          pomodoro.currentMode == PomodoroMode.longBreak,
                     ),
                   ],
                 ),
@@ -125,7 +131,9 @@ class PomodoroScreen extends StatelessWidget {
                     color: isDark ? const Color(0xFF1E293B) : Colors.white,
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                      color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                      color: isDark
+                          ? const Color(0xFF334155)
+                          : const Color(0xFFE2E8F0),
                     ),
                   ),
                   child: Row(
@@ -143,7 +151,9 @@ class PomodoroScreen extends StatelessWidget {
                             fontSize: 13,
                             fontWeight: FontWeight.w500,
                             fontStyle: FontStyle.italic,
-                            color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF475569),
+                            color: isDark
+                                ? const Color(0xFFCBD5E1)
+                                : const Color(0xFF475569),
                           ),
                         ),
                       ),
@@ -151,7 +161,9 @@ class PomodoroScreen extends StatelessWidget {
                       Icon(
                         Icons.refresh_rounded,
                         size: 16,
-                        color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                        color: isDark
+                            ? const Color(0xFF94A3B8)
+                            : const Color(0xFF64748B),
                       ),
                     ],
                   ),
@@ -167,31 +179,46 @@ class PomodoroScreen extends StatelessWidget {
                   color: isDark ? const Color(0xFF1E293B) : Colors.white,
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
-                    color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                    color: isDark
+                        ? const Color(0xFF334155)
+                        : const Color(0xFFE2E8F0),
                   ),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Row(
-                          children: [
-                            const Icon(Icons.storage_rounded, size: 18, color: Color(0xFF10B981)),
-                            const SizedBox(width: 8),
-                            Text(
-                              'Nhật Ký Phiên Học SQLite',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w800,
-                                color: isDark ? Colors.white : const Color(0xFF0F172A),
+                        Expanded(
+                          child: Row(
+                            children: [
+                              const Icon(
+                                Icons.storage_rounded,
+                                size: 18,
+                                color: Color(0xFF10B981),
                               ),
-                            ),
-                          ],
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  'Nhật Ký Phiên Học ',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w800,
+                                    color: isDark
+                                        ? Colors.white
+                                        : const Color(0xFF0F172A),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
+                        const SizedBox(width: 8),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 3),
                           decoration: BoxDecoration(
                             color: const Color(0xFF10B981).withOpacity(0.12),
                             borderRadius: BorderRadius.circular(8),
@@ -279,7 +306,9 @@ class PomodoroScreen extends StatelessWidget {
                 fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
                 color: isSelected
                     ? activeColor
-                    : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
+                    : (isDark
+                        ? const Color(0xFF94A3B8)
+                        : const Color(0xFF64748B)),
               ),
             ),
           ),
@@ -297,7 +326,9 @@ class PomodoroScreen extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF0F172A).withOpacity(0.5) : const Color(0xFFF8FAFC),
+        color: isDark
+            ? const Color(0xFF0F172A).withOpacity(0.5)
+            : const Color(0xFFF8FAFC),
         borderRadius: BorderRadius.circular(14),
       ),
       child: Column(
