@@ -90,16 +90,29 @@ Thầy giảng viên đã bật chế độ bảo vệ nhánh và có hệ thố
   - Hỗ trợ thành viên kết nối API, cấu hình server và xử lý các lỗi kỹ thuật phức tạp.
 
 ### 👤 2. Đào Thị Yến — Frontend Developer (Flutter Core UI & Discipline System)
-* **Trách nhiệm chính:**
+* **Trách nhiệm chính & Tiến độ hoàn thành:**
   - Thiết kế và lập trình giao diện người dùng **Flutter Material 3** (hỗ trợ thích ứng cả Light Theme và Dark Theme).
-  - **Lập trình phân hệ Hệ thống & Xác thực:** Màn hình Splash, Onboarding giới thiệu app, Đăng nhập / Đăng ký và Quản lý trang cá nhân.
-  - **Lập trình phân hệ Trang chủ & Kỷ luật (Dashboard & Discipline):**
-    - Màn hình Dashboard trung tâm: Chuỗi ngày kỷ luật (**Streak 🔥**), Vòng tròn mục tiêu ngày (**Daily Goal Progress Ring**).
-    - Biểu đồ thời gian học 7 ngày và **Bản đồ nhiệt độ học tập 30 ngày (Monthly Heatmap Grid)**.
-  - **Lập trình phân hệ Đồng hồ tập trung (Focus Pomodoro Timer):**
-    - Widget vòng tròn đếm ngược thời gian hoạt họa mượt mà (Animated Circular Countdown).
-    - Chế độ khóa xao nhãng khi đang trong phiên học tập trung.
-  - Quản lý trạng thái giao diện bằng Provider: `ThemeProvider`, `PomodoroProvider`, `DisciplineProvider`.
+  - **Lập trình phân hệ Hệ thống & Xác thực (Sprint 1 / Issue #1 — Hoàn thành 100%):**
+    - [x] Màn hình Splash hiển thị logo hoạt họa StudyMate AI và chuyển cảnh mượt mà.
+    - [x] Màn hình Onboarding (PageView 3 bước vuốt ngang: Luyện phát âm AI, Đồng hồ Pomodoro, Thẻ Flashcards SM-2).
+    - [x] Form Đăng nhập và Đăng ký (Email, Mật khẩu, Họ tên) có kiểm tra hợp lệ dữ liệu đầu vào (Validation).
+    - [x] Hỗ trợ chuyển đổi giao diện mượt mà giữa Light Theme và Dark Theme (`ThemeProvider`).
+    - [x] Đặt toàn bộ file bên trong thư mục: `nhom19-65ktpm/src/mobile/lib/views/auth/`.
+  - **Lập trình phân hệ Trang chủ & Kỷ luật (Sprint 2 / Issue #2 — Hoàn thành 100%):**
+    - [x] Hiển thị biểu tượng ngọn lửa chuỗi ngày học liên tục (**Streak 🔥**) và số ngày streak hiện tại.
+    - [x] Lập trình vòng tròn tiến độ mục tiêu ngày (**Daily Goal Progress Ring** — hoàn thành 25/30 phút học hôm nay).
+    - [x] Xây dựng bản đồ nhiệt độ học tập 30 ngày (**Monthly Heatmap Grid**) theo phong cách GitHub Contribution (màu xanh đậm dần theo mức độ học).
+    - [x] Thêm dải chọn ngày cuộn ngang (**DateSelectorStrip**) để xem lại lịch sử các ngày trong tuần.
+    - [x] Tích hợp `DisciplineProvider` để lắng nghe dữ liệu cập nhật thời gian thực.
+    - [x] Đặt toàn bộ file bên trong thư mục: `nhom19-65ktpm/src/mobile/lib/views/dashboard/`.
+  - **Lập trình phân hệ Đồng hồ tập trung Pomodoro (Sprint 3 / Issue #3 — Hoàn thành 100%):**
+    - [x] Thiết kế vòng tròn đếm ngược hoạt họa (**Animated Circular Countdown**) hiển thị phút/giây.
+    - [x] Lập trình các nút điều khiển: Bắt đầu (Start), Tạm dừng (Pause), Đặt lại (Reset), Bỏ qua (Skip).
+    - [x] Hỗ trợ tùy chỉnh thời gian linh hoạt trong Settings (25 phút tập trung, 5 phút nghỉ ngắn, 15 phút nghỉ dài).
+    - [x] Chế độ khóa xao nhãng: Giữ màn hình luôn sáng (Wakelock) và hiển thị câu trích dẫn truyền cảm hứng học tập.
+    - [x] Tích hợp âm thanh chuông báo khi kết thúc phiên đếm ngược (về 00:00).
+    - [x] Quản lý trạng thái bằng `PomodoroProvider` và tự động lưu phiên học vào SQLite (`PomodoroDatabaseHelper`).
+    - [x] Đặt toàn bộ file bên trong thư mục: `nhom19-65ktpm/src/mobile/lib/views/pomodoro/`.
 
 ### 👤 3. Nguyễn Năng Vũ Hùng — Frontend Developer (Flutter AI Speech & Smart Learning)
 * **Trách nhiệm chính:**

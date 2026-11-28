@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
+import '../dashboard/dashboard_screen.dart';
 import 'home_preview_screen.dart';
 import 'theme_toggle_button.dart';
 
@@ -73,10 +74,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
         ),
       );
 
-      // Chuyển sang màn hình xem trước Dashboard sau khi tạo tài khoản
+      // Chuyển thẳng sang màn hình Dashboard cá nhân sau khi tạo tài khoản
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(
-          builder: (context) => const HomePreviewScreen(),
+          builder: (context) => const DashboardScreen(),
         ),
         (route) => false,
       );

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
+import '../dashboard/dashboard_screen.dart';
 import 'home_preview_screen.dart';
 import 'register_screen.dart';
 import 'theme_toggle_button.dart';
@@ -57,10 +58,10 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       );
 
-      // Chuyển sang màn hình xem trước Dashboard
+      // Chuyển thẳng sang màn hình Dashboard cá nhân
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
-          builder: (context) => const HomePreviewScreen(),
+          builder: (context) => const DashboardScreen(),
         ),
       );
     } else {

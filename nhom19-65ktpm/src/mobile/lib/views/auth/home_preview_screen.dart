@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/theme_provider.dart';
+import '../dashboard/dashboard_screen.dart';
 import 'login_screen.dart';
 import 'theme_toggle_button.dart';
 
@@ -228,7 +229,33 @@ class HomePreviewScreen extends StatelessWidget {
                 color: const Color(0xFF10B981),
                 isDark: isDark,
               ),
-              const SizedBox(height: 28),
+              const SizedBox(height: 20),
+
+              // Nút chuyển trực tiếp sang Dashboard Kỷ Luật (Issue 2)
+              ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFEA580C),
+                  foregroundColor: Colors.white,
+                  minimumSize: const Size(double.infinity, 52),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  elevation: 2,
+                ),
+                icon: const Icon(Icons.local_fire_department_rounded, size: 22),
+                label: const Text(
+                  'Mở Dashboard Kỷ Luật (Streak 🔥 & Heatmap)',
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                ),
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const DashboardScreen(),
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 16),
 
               // Nút Đăng xuất
               OutlinedButton.styleFrom(

@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mobile/main.dart';
 import 'package:mobile/providers/auth_provider.dart';
+import 'package:mobile/providers/discipline_provider.dart';
 import 'package:mobile/providers/theme_provider.dart';
 import 'package:mobile/theme/app_theme.dart';
+import 'package:mobile/views/dashboard/dashboard_screen.dart';
 import 'package:mobile/views/auth/login_screen.dart';
 import 'package:mobile/views/auth/onboarding_screen.dart';
 import 'package:mobile/views/auth/register_screen.dart';
+import 'package:mobile/views/auth/splash_screen.dart';
 import 'package:provider/provider.dart';
 
 void main() {
@@ -65,6 +69,17 @@ void main() {
   });
 
   group('Widget UI & Responsive Tests', () {
+    Widget createStudyMateApp() {
+      return MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (_) => ThemeProvider()),
+          ChangeNotifierProvider(create: (_) => AuthProvider()),
+          ChangeNotifierProvider(create: (_) => DisciplineProvider()),
+        ],
+        child: const StudyMateApp(),
+      );
+    }
+
     Widget createTestApp(Widget child) {
       return MultiProvider(
         providers: [
@@ -153,9 +168,37 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Tạo tài khoản mới 🚀'), findsOneWidget);
-      expect(find.byType(TextFormField), findsNWidgets(4)); // Họ tên, Email, Mật khẩu, Xác nhận
+      expect(find.byType(TextFormField),
+          findsNWidgets(4)); // Họ tên, Email, Mật khẩu, Xác nhận
       expect(find.widgetWithText(ElevatedButton, 'Đăng ký tài khoản'),
           findsOneWidget);
+    });
+
+    testWidgets('Startup shows Splash and Onboarding before Dashboard',
+        (tester) async {
+      await tester.pumpWidget(createStudyMateApp());
+
+      expect(find.byType(SplashScreen), findsOneWidget);
+
+      await tester.pump(const Duration(milliseconds: 2800));
+      await tester.pump(const Duration(milliseconds: 600));
+      expect(find.byType(OnboardingScreen), findsOneWidget);
+
+      await tester.tap(find.text('Bỏ qua'));
+      await tester.pumpAndSettle();
+      expect(find.byType(LoginScreen), findsOneWidget);
+
+      await tester.enterText(
+        find.byType(TextFormField).first,
+        'student@example.com',
+      );
+      await tester.enterText(find.byType(TextFormField).last, '123456');
+      await tester.tap(find.widgetWithText(ElevatedButton, 'Đăng nhập'));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      await tester.pump(const Duration(milliseconds: 300));
+
+      expect(find.byType(DashboardScreen), findsOneWidget);
     });
   });
 }
