@@ -5,32 +5,44 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import get_settings
+from app.routers.ai import router as ai_router
+from app.routers.auth import router as auth_router
 from app.routers.speech import router as speech_router
 from app.services.asr_service import get_asr_service
+from app.services.auth_service import get_auth_service
 from app.services.phoneme_service import get_phoneme_dictionary
 
 logger = logging.getLogger(__name__)
 
 API_DESCRIPTION = """
-Microservice AI phân tích và chấm điểm phát âm tiếng Anh theo âm vị chuẩn quốc tế (**StudyMate AI**).
+Microservice AI của hệ thống **StudyMate AI**, gồm 3 phân hệ:
 
-### Quy trình xử lý (Pipeline)
-1. **Giải mã âm thanh In-Memory (`PyAV`):** Hỗ trợ WAV, MP3, M4A, OGG, FLAC và chuẩn hóa về 16 kHz mono PCM.
-2. **Nhận dạng giọng nói (`Faster-Whisper`):** Chuyển giọng nói người dùng thành văn bản tiếng Anh offline trên CPU (`base.en` int8).
-3. **Từ điển âm vị (`NLTK CMUDict` + `g2p-en`):** Sinh chuỗi âm vị chuẩn Arpabet/IPA cho câu mẫu và giọng nói người dùng.
-4. **Phoneme Alignment & Levenshtein Distance:**
-   - Căn chỉnh cấp từ bằng **Needleman-Wunsch** theo độ tương đồng âm vị (xử lý tốt trường hợp đọc thiếu hoặc dư từ).
-   - Tính khoảng cách chỉnh sửa **Levenshtein** trên chuỗi âm vị Arpabet chuẩn hóa, tự động chọn biến thể phát âm gần nhất trong CMUDict.
-5. **Chấm điểm 0–100% & Phân loại:**
-   - `correct`: `score >= 80`
-   - `warning`: `50 <= score < 80`
-   - `error`: `score < 50` (hoặc từ bị bỏ sót)
+### 1. Xác thực bảo mật JWT (`/api/auth/*`)
+- Đăng ký (`/api/auth/register`), đăng nhập (`/api/auth/login` hoặc `/api/auth/token`), lấy hồ sơ (`/api/auth/me`).
+- Cấp phát & xác thực token **JWT HS256 Bearer** bảo vệ các API AI sinh tri thức.
+
+### 2. AI Tóm tắt bài học & Sinh Flashcards / Quiz (`/api/ai/generate-flashcards`)
+- Nhận văn bản trực tiếp hoặc tải lên tài liệu `.txt`, `.md`, `.pdf`, `.docx`.
+- Sử dụng **Google Gemini API (`google-genai`)** với Strict JSON Schema + **Fallback Parser đa tầng** (gỡ markdown fence, sửa JSON lỗi/cắt cụt, chuẩn hóa item lẻ, trích xuất văn bản thô).
+- Sinh bản tóm tắt bài học, các ý trọng tâm, thẻ Flashcard 2 mặt và câu hỏi Quiz 4 phương án A/B/C/D kèm giải thích.
+
+### 3. Chấm điểm phát âm âm vị (`/api/speech/evaluate`)
+- Giải mã WAV/MP3/M4A in-memory (`PyAV`), nhận dạng giọng nói offline (`Faster-Whisper`).
+- Đối chiếu âm vị **NLTK CMUDict / IPA** bằng Needleman-Wunsch + Levenshtein Distance, chấm điểm 0–100%.
 """
 
 OPENAPI_TAGS = [
     {
+        "name": "Authentication (JWT)",
+        "description": "Đăng ký, đăng nhập và cấp phát Bearer JWT Token.",
+    },
+    {
+        "name": "AI Study Assistant (Gemini LLM)",
+        "description": "Tóm tắt bài học và sinh Flashcards / Quiz tự động (yêu cầu JWT).",
+    },
+    {
         "name": "Speech Pronunciation Evaluation",
-        "description": "Các endpoint phân tích âm vị và chấm điểm phát âm tiếng Anh.",
+        "description": "Phân tích âm vị và chấm điểm phát âm tiếng Anh.",
     },
     {
         "name": "System",
@@ -42,6 +54,7 @@ OPENAPI_TAGS = [
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
     settings = get_settings()
+    get_auth_service()
     dictionary = get_phoneme_dictionary()
     logger.info("Loaded CMUDict with %d entries.", dictionary.entry_count)
     if settings.whisper_preload:
@@ -71,6 +84,8 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
 
+    application.include_router(auth_router)
+    application.include_router(ai_router)
     application.include_router(speech_router)
     return application
 
