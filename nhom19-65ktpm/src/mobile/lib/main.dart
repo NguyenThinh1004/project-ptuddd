@@ -1,6 +1,8 @@
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'database/database_helper.dart';
 import 'providers/auth_provider.dart';
 import 'providers/discipline_provider.dart';
 import 'providers/pomodoro_provider.dart';
@@ -14,8 +16,12 @@ import 'views/auth/splash_screen.dart';
 import 'views/dashboard/dashboard_screen.dart';
 import 'views/pomodoro/pomodoro_screen.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Khoi tao SQLite khi ung dung bat dau
+  await DatabaseHelper.instance.database;
+
   runApp(
     MultiProvider(
       providers: [
