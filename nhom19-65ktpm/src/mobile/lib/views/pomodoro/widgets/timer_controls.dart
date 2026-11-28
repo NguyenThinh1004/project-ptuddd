@@ -127,36 +127,47 @@ class TimerControls extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             // Nút Khóa xao nhãng (Distraction Lock)
-            OutlinedButton.icon(
-              style: OutlinedButton.styleFrom(
-                foregroundColor: pomodoro.isDistractionLockEnabled
-                    ? const Color(0xFF10B981)
-                    : (isDark ? const Color(0xFFCBD5E1) : const Color(0xFF475569)),
-                side: BorderSide(
-                  color: pomodoro.isDistractionLockEnabled
+            Expanded(
+              child: OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: pomodoro.isDistractionLockEnabled
                       ? const Color(0xFF10B981)
-                      : (isDark ? const Color(0xFF475569) : const Color(0xFFCBD5E1)),
+                      : (isDark
+                          ? const Color(0xFFCBD5E1)
+                          : const Color(0xFF475569)),
+                  side: BorderSide(
+                    color: pomodoro.isDistractionLockEnabled
+                        ? const Color(0xFF10B981)
+                        : (isDark
+                            ? const Color(0xFF475569)
+                            : const Color(0xFFCBD5E1)),
+                  ),
+                  minimumSize: const Size(0, 52),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
+                icon: Icon(
+                  pomodoro.isDistractionLockEnabled
+                      ? Icons.lock_rounded
+                      : Icons.lock_open_rounded,
+                  size: 18,
                 ),
+                label: Text(
+                  pomodoro.isDistractionLockEnabled
+                      ? 'Đang Khóa Xao Nhãng'
+                      : 'Bật Khóa Xao Nhãng',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style:
+                      const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                ),
+                onPressed: () {
+                  pomodoro.toggleDistractionLock();
+                },
               ),
-              icon: Icon(
-                pomodoro.isDistractionLockEnabled
-                    ? Icons.lock_rounded
-                    : Icons.lock_open_rounded,
-                size: 18,
-              ),
-              label: Text(
-                pomodoro.isDistractionLockEnabled
-                    ? 'Đang Khóa Xao Nhãng'
-                    : 'Bật Khóa Xao Nhãng',
-                style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
-              ),
-              onPressed: () {
-                pomodoro.toggleDistractionLock();
-              },
             ),
             const SizedBox(width: 12),
 

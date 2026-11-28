@@ -245,6 +245,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(pomodoro.isRunning, isTrue);
+      pomodoro.dispose();
     });
 
     testWidgets(
@@ -294,7 +295,7 @@ void main() {
 
     testWidgets('PomodoroScreen renders properly without RenderFlex overflow',
         (tester) async {
-      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.physicalSize = const Size(720, 1600);
       tester.view.devicePixelRatio = 2.0;
 
       await tester.pumpWidget(createPomodoroTestApp());

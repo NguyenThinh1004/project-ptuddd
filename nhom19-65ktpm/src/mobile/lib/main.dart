@@ -30,7 +30,7 @@ void main() {
 }
 
 /// Ứng dụng chính StudyMate AI
-/// Màn hình chính mặc định hiển thị thẳng vào Dashboard cá nhân (Kỷ luật, Streak, Heatmap)
+/// Bắt đầu từ luồng Splash, Onboarding, Xác thực trước khi vào Dashboard
 class StudyMateApp extends StatelessWidget {
   const StudyMateApp({super.key});
 
@@ -44,10 +44,9 @@ class StudyMateApp extends StatelessWidget {
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: themeProvider.themeMode,
-      // Màn hình chính hiển thị thẳng vào Dashboard cá nhân
-      initialRoute: '/dashboard',
+      initialRoute: '/',
       routes: {
-        '/': (context) => const DashboardScreen(),
+        '/': (context) => const SplashScreen(),
         '/dashboard': (context) => const DashboardScreen(),
         '/pomodoro': (context) => const PomodoroScreen(),
         '/splash': (context) => const SplashScreen(),
