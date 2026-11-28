@@ -12,3 +12,6 @@ dist/
 build/
 nltk_data/
 models/
+data/
+*.db
+*.sqlite*
